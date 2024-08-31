@@ -19,7 +19,7 @@ local function send_heartbeat(language)
             '-X', 'POST',
             '-H', 'Content-Type: application/json',
             '-d', body,
-            config.HEARTBEAT
+            config.BASE_URL .. config.HEARTBEAT
         },
         on_exit = function(j, return_val)
             if return_val == 0 then

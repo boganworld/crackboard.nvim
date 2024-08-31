@@ -1,4 +1,5 @@
 local config = require 'crackboard.config'
+local Job = require 'plenary.job'
 
 local function send_heartbeat(language)
     if not config.session_key then
@@ -12,68 +13,23 @@ local function send_heartbeat(language)
         language_name = language
     })
 
-    local client = vim.loop.new_tcp()
-    local req = table.concat({
-        string.format("POST %s HTTP/1.1", config.HEARTBEAT),
-        "Host: " .. config.BASE_URL,
-        "Accept: */*",
-        "Content-Type: application/json",
-        "Content-Length: ".. #body,
-        "",
-        body,
-        "",
-    }, "\n")
-
-    print(req)
-
-    vim.loop.getaddrinfo(config.BASE_URL, "443", {
-        family = "inet",
-        socktype = "stream",
-        protocol = "tcp"
-    }, function(err, res)
-        if err then
-            print("DNS resolution error: " .. err)
-            return
-        end
-
-        if not res or #res == 0 then
-            print("Failed to resolve " .. config.BASE_URL)
-            return
-        end
-
-        local client = vim.loop.new_tcp()
-        client:connect(res[1].addr, res[1].port, function(err)
-            if err then
-                print("Connection error: " .. err)
-                client:close()
-                return
+    Job:new({
+        command = 'curl',
+        args = {
+            '-X', 'POST',
+            '-H', 'Content-Type: application/json',
+            '-d', body,
+            config.HEARTBEAT
+        },
+        on_exit = function(j, return_val)
+            if return_val == 0 then
+                print("Heartbeat sent successfully")
+            else
+                print('Failed to send heartbeat. Status: ' .. return_val)
+                print(table.concat(j:stderr_result(), "\n"))
             end
-
-            client:write(req)
-
-            local response = ""
-            client:read_start(function(err, chunk)
-                if err then
-                    print("Read error: " .. err)
-                    client:close()
-                    return
-                end
-
-                if chunk then
-                    response = response .. chunk
-                else
-                    client:close()
-                    local status = response:match("HTTP/1%.%d (%d+)")
-                    if status == "200" then
-                        config.last_heartbeat_time = uv.now()
-                        print("Heartbeat sent successfully")
-                    else
-                        print('Failed to send heartbeat. Status: ' .. (status or "unknown"))
-                    end
-                end
-            end)
-        end)
-    end)
+        end
+    }):start()
 end
 
 local function on_save()

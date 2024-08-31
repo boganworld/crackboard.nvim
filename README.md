@@ -7,10 +7,11 @@ lazy (wip):
 ```lua
 require('lazy').setup({
   {
-    'crackboard.nvim',
-    config = function()
-      require('crackboard.nvim').setup({
-        session_key = 'xx'
+    'boganworld/crackboard.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    setup = function()
+      require('crackboard').setup({
+        session_key = 'xx',
       })
     end,
   }

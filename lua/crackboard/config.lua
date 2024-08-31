@@ -1,5 +1,5 @@
 local default_config = {
-    BASE_URL = "crackboard.dev",
+    BASE_URL = "https://crackboard.dev",
     HEARTBEAT = "/heartbeat",
     HEARTBEAT_INTERVAL = 2 * 60 * 1000, -- 2 minutes in milliseconds
     session_key = nil,

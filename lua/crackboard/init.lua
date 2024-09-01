@@ -52,7 +52,7 @@ local function setTimeout(timeout, callback)
 end
 
 local function on_change()
-	if config.typing_timer and config.typing_timer.is_active then
+	if config.typing_timer and config.typing_timer:is_active() then
 		config.typing_timer:stop()
 		config.typing_timer:close()
 	end

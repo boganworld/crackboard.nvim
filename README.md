@@ -9,6 +9,7 @@ require('lazy').setup({
   {
     'boganworld/crackboard.nvim',
     dependencies = { 'nvim-lua/plenary.nvim' },
+    event = "VeryLazy",
     config = function()
       require('crackboard').setup({
         session_key = 'xx',

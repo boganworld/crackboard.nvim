@@ -44,6 +44,10 @@ end
 local function setTimeout(timeout, callback)
 	local timer = vim.uv and vim.uv.new_timer() or vim.loop.new_timer()
 	timer:start(timeout, 0, function()
+		-- i wonder if it's possible to close and also have this cb called at the same time?
+		if not timer:is_active() then
+			return
+		end
 		timer:stop()
 		timer:close()
 		callback()
@@ -56,6 +60,7 @@ local function on_change()
 		config.typing_timer:stop()
 		config.typing_timer:close()
 	end
+	-- wait until heart beat is available
 	config.typing_timer = setTimeout(
 		config.HEARTBEAT_INTERVAL,
 		vim.schedule_wrap(function()
@@ -88,7 +93,7 @@ function M.load_session_key()
 end
 
 function M.setup(opts)
-	print(opts)
+	-- print(opts)
 
 	config = vim.tbl_deep_extend("force", config, opts)
 
